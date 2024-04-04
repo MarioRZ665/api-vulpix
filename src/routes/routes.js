@@ -12,3 +12,5 @@ router.patch('/update/:id', modelController.updateDataById);
 // Método DELETE para eliminar por ID
 router.delete('/delete/:id', modelController.deleteDataById);
 module.exports = router;
+
+
