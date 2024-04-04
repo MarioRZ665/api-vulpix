@@ -14,13 +14,15 @@ database.on('error', (error) => {
 database.once('connected', () => {
     console.log('Database Connected');
 })
+
 const app = express();
 app.use(cors())
 app.use(express.json());
 
 const routes = require('./src/routes/routes');
 
-app.use('/api', routes)
+// Usa el enrutador en la ruta '/api'
+app.use('/api', routes);
 
 app.listen(3000, () => {
     console.log(`Server Started at ${3000}`)
