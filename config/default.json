@@ -3,7 +3,8 @@
       "dbConfig": {
         "host": "localhost",
         "port": 5984,
-        "dbName": "customers"
+        "dbName": "customers",
+        "DATABASE_URL":"mongodb+srv://vulpix_21:Amd_a9hp@cluster0.kgmnbri.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
       },
       "credit": {
         "initialLimit": 100,

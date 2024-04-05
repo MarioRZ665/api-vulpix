@@ -1,6 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const modelController = require('../controllers/modelController');
+let express = require('express');
+let router = express.Router();
+let modelController = require('../controllers/modelController');
+
 // Método POST
 router.post('/post', modelController.createData);
 // Método GET para obtener todos
@@ -11,6 +12,10 @@ router.get('/getOne/:id', modelController.getDataById);
 router.patch('/update/:id', modelController.updateDataById);
 // Método DELETE para eliminar por ID
 router.delete('/delete/:id', modelController.deleteDataById);
+
+//Login and register
+
+
 module.exports = router;
 
 
