@@ -1,73 +1,64 @@
-const express = require('express');
-const Model = require('../models/model');
-const router = express.Router();
+let express = require('express');
+let router = express.Router();
+let modelController = require('../controllers/modelController');
+let auth = require('../controllers/auth');
+let Login = require('../controllers/login');
+const { check, validationResult } = require('express-validator');
+const Validate = require('../middleware/validate');
+const { Verify,VerifyRole } = require('../middleware/verify'); // Importar la función Verify del middleware de autenticación
 
-//Post Method
-router.post('/post', async (req, res) => {
-    const data = new Model({
-        name: req.body.name,
-        age: req.body.age
-    })
+const registrationValidationRules = [
+	check('email').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+	check('first_name').not().isEmpty().withMessage('You first name is required').trim().escape(),
+	check('last_name').not().isEmpty().withMessage('You last name is required').trim().escape(), check('password').notEmpty().isLength({ min: 8 }).withMessage('Must be at least 8 chars long'),
+];
 
-    try {
-        const dataToSave = await data.save();
-        res.status(200).json(dataToSave)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-})
+const loginRules = [
+	check('email').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+	check('password').not().isEmpty(),
+];
+// Método POST
+router.post('/post', Verify,modelController.createData);
+// Método GET para obtener todos
+router.get('/getAll', Verify,modelController.getAllData);
+// Método GET para obtener por ID
+router.get('/getOne/:id',Verify, modelController.getDataById);
+// Método PATCH para actualizar por ID
+router.patch('/update/:id', Verify ,modelController.updateDataById);
+// Método DELETE para eliminar por ID
+router.delete('/delete/:id', Verify,modelController.deleteDataById);
 
-//Get all Method
-router.get('/getAll', async (req, res) => {
-    try {
-        const data = await Model.find();
-        res.json(data)
-    }
-    catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-})
+router.post('/register', Validate, registrationValidationRules, (req, res) => {
+	// Check for validation errors
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(400).json({ errors: errors.array() });
+	}
+	auth.createUser(req, res);
+});
 
-//Get by ID Method
-router.get('/getOne/:id', async (req, res) => {
-    try {
-        const data = await Model.findById(req.params.id);
-        res.json(data)
-    }
-    catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-})
+router.post('/login', Validate, loginRules, (req, res) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(400).json({ errors: errors.array() });
+	}
+	Login.loginUser(req, res);
+});
 
-//Update by ID Method
-router.patch('/update/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        const updatedData = req.body;
-        const options = { new: true };
+router.get('/protected', Verify, (req, res) => { 
+	res.status(200).json({
+		status: 'success',
+		message: 'Welcome to the your Dashboard!',
+	  });
+});
 
-        const result = await Model.findByIdAndUpdate(
-            id, updatedData, options
-        )
-
-        res.send(result)
-    }
-    catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-})
-
-//Delete by ID Method
-router.delete('/delete/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        const data = await Model.findByIdAndDelete(id)
-        res.send(`Document with ${data.name} has been deleted..`)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-})
-
+router.get('/admin', Verify, VerifyRole, (req, res) => { 
+	res.status(200).json({
+		status: 'success',
+		message: 'Welcome to the your Dashboard!',
+	  });
+});
+router.get('/logout', auth.Logout);
 module.exports = router;
+
+
